@@ -10,9 +10,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val pieChart = findViewById<SimplePieChart>(R.id.piechart_view)
         pieChart.addSlice(com.dynocodes.grafify.SimplePieChart.Slice(Color.BLUE, 20f,"ram"))
+        pieChart.addSlice(com.dynocodes.grafify.SimplePieChart.Slice(Color.GREEN, 40f,"shyam"))
         pieChart.addSlice(com.dynocodes.grafify.SimplePieChart.Slice(Color.RED, 40f,"shyam"))
-        pieChart.addSlice(com.dynocodes.grafify.SimplePieChart.Slice(Color.RED, 40f,"shyam"))
-        pieChart.addSlice(com.dynocodes.grafify.SimplePieChart.Slice(Color.RED, 40f,"shyam"))
+        pieChart.addSlice(com.dynocodes.grafify.SimplePieChart.Slice(Color.CYAN, 40f,"shyam"))
         pieChart.addSlice(com.dynocodes.grafify.SimplePieChart.Slice(Color.YELLOW, 30f,"shyam"))
     }
 }

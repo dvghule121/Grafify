@@ -153,18 +153,26 @@ class SimplePieChart @JvmOverloads constructor(
         for (i in 0..slices.size - 1) {
             sum += slices[i].value.toInt()
             sliceHalfAngle = sliceStartAngle + getSliceAngle(slices[i]) / 2f
-            textCenterX = MathUtils.getPointX(
-                contentBounds.centerX(), textDistance, sliceHalfAngle
-            )
-            textCenterY = MathUtils.getPointY(
-                contentBounds.centerY(), textDistance, sliceHalfAngle
-            )
+
 
             if (showCenteredLabel) {
+                textCenterX = MathUtils.getPointX(
+                    contentBounds.centerX(), textDistance, sliceHalfAngle
+                )
+                textCenterY = MathUtils.getPointY(
+                    contentBounds.centerY(), textDistance, sliceHalfAngle
+                )
                 drawCenteredLabel(canvas, slices[i], textCenterX, textCenterY, textPaint)
             }
             else{
+                textCenterX = MathUtils.getPointX(
+                    contentBounds.centerX(), chartRadius*0.5f, sliceHalfAngle
+                )
+                textCenterY = MathUtils.getPointY(
+                    contentBounds.centerY(),  chartRadius*0.5f, sliceHalfAngle
+                )
                 // Draw lable at bottom with respective colored square
+
                 drawBottomLabel(canvas, slices[i], textPaint, i,textCenterX,textCenterY)
             }
 
@@ -226,12 +234,7 @@ class SimplePieChart @JvmOverloads constructor(
         val bounds = Rect()
         textPaint.getTextBounds(text, 0, text.length, bounds)
         val squarePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        canvas.drawText(
-            text,
-            textCenterX,
-            textCenterY,
-            this.textPaint
-        )
+
 
         squarePaint.color = labelColor
         canvas.drawRect(squareLeft, squareTop, squareRight, squareBottom, squarePaint)
@@ -243,6 +246,15 @@ class SimplePieChart @JvmOverloads constructor(
             labelY - labelBounds.exactCenterY(),
             textPaint
         )
+        textPaint.color = Color.BLACK
+        canvas.drawText(
+            text,
+            textCenterX,
+            textCenterY,
+            this.textPaint
+        )
+
+        textPaint.color = textColor
 
     }
 
