@@ -7,9 +7,6 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import androidx.annotation.ColorInt
-import com.dynocodes.grafify.MathUtils
-import com.dynocodes.grafify.PathUtils
-import com.dynocodes.grafify.R
 
 class SimplePieChart @JvmOverloads constructor(
     context: Context,
@@ -20,8 +17,10 @@ class SimplePieChart @JvmOverloads constructor(
     // Attributes
     private var textSize = 0f
     private var iconSize = 0f
+    private var showCenteredLabel = DEFAULT_SHOW_LABEL
     private var decorRingWeight = DEFAULT_DECOR_RING_WEIGHT
     private var innerHoleWeight = DEFAULT_INNER_HOLE_WEIGHT
+    private var labelSpacing = DEFAULT_LABEL_SPACING
 
     @ColorInt
     private var decorRingColor = DEFAULT_DECOR_RING_COLOR
@@ -39,7 +38,7 @@ class SimplePieChart @JvmOverloads constructor(
     private val slicePaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var slicePath: Path? = null
+    private var slicePath: Path? = Path()
 
 
     init {
@@ -94,12 +93,19 @@ class SimplePieChart @JvmOverloads constructor(
                     dm
                 ).toInt()
             ).toFloat()
+            showCenteredLabel = array.getBoolean(R.styleable.SimplePieChart_showCenterLabel,DEFAULT_SHOW_LABEL)
             decorRingColor =
                 array.getColor(R.styleable.SimplePieChart_decorRingColor, DEFAULT_DECOR_RING_COLOR)
             decorRingWeight =
-                array.getFloat(R.styleable.SimplePieChart_decorRingWeight, DEFAULT_DECOR_RING_WEIGHT)
+                array.getFloat(
+                    R.styleable.SimplePieChart_decorRingWeight,
+                    DEFAULT_DECOR_RING_WEIGHT
+                )
             innerHoleWeight =
-                array.getFloat(R.styleable.SimplePieChart_innerHoleWeight, DEFAULT_INNER_HOLE_WEIGHT)
+                array.getFloat(
+                    R.styleable.SimplePieChart_innerHoleWeight,
+                    DEFAULT_INNER_HOLE_WEIGHT
+                )
 
         } finally {
             array.recycle()
@@ -137,14 +143,16 @@ class SimplePieChart @JvmOverloads constructor(
 
     private fun drawPercentageValues(canvas: Canvas) {
         var sliceStartAngle = START_ANGLE_OFFSET.toFloat()
-        val textDistance = chartRadius * (0.8f)
+        val textDistance = chartRadius * (0.8f) + labelSpacing
         var sliceHalfAngle: Float
         var textCenterX: Float
         var textCenterY: Float
+        textPaint.color = textColor
+        textPaint.textSize = textSize
         var sum = 0
-        for (slice in slices) {
-            sum += slice.value.toInt()
-            sliceHalfAngle = sliceStartAngle + getSliceAngle(slice) / 2f
+        for (i in 0..slices.size - 1) {
+            sum += slices[i].value.toInt()
+            sliceHalfAngle = sliceStartAngle + getSliceAngle(slices[i]) / 2f
             textCenterX = MathUtils.getPointX(
                 contentBounds.centerX(), textDistance, sliceHalfAngle
             )
@@ -152,19 +160,18 @@ class SimplePieChart @JvmOverloads constructor(
                 contentBounds.centerY(), textDistance, sliceHalfAngle
             )
 
-            val text = slice.value.toInt().toString()
-            val bounds = Rect()
-            textPaint.getTextBounds(text, 0, text.length, bounds)
-            textPaint.color = textColor
-            textPaint.textSize = textSize
+            if (showCenteredLabel) {
+                drawCenteredLabel(canvas, slices[i], textCenterX, textCenterY, textPaint)
+            }
+            else{
+                // Draw lable at bottom with respective colored square
+                drawBottomLabel(canvas, slices[i], textPaint, i,textCenterX,textCenterY)
+            }
 
-            canvas.drawText(
-                text,
-                textCenterX,
-                textCenterY - bounds.exactCenterY(),
-                textPaint
-            )
-            sliceStartAngle += getSliceAngle(slice)
+
+
+
+            sliceStartAngle += getSliceAngle(slices[i])
         }
 
         // Draw "Total" text
@@ -176,7 +183,92 @@ class SimplePieChart @JvmOverloads constructor(
         val totalText = "₹ $sum"
         textPaint.textSize = textSize
         textPaint.typeface = Typeface.DEFAULT_BOLD
-        canvas.drawText(totalText, contentBounds.centerX(), contentBounds.centerY() + 20f, textPaint)
+        canvas.drawText(
+            totalText,
+            contentBounds.centerX(),
+            contentBounds.centerY() + 20f,
+            textPaint
+        )
+    }
+
+    private fun drawBottomLabel(
+        canvas: Canvas, slice: Slice, textPaint: Paint, index: Int, textCenterX: Float,
+        textCenterY: Float,
+    ) {
+        // Draw label at the bottom of the view with respective color
+        val label = slice.label
+        val labelColor = slice.color
+
+        textPaint.textSize = textSize
+
+        val labelBounds = Rect()
+        textPaint.getTextBounds(label, 0, label.length, labelBounds)
+
+        var labelX = 0
+        var labelY = contentBounds.bottom + DEFAULT_LABEL_BOTTOM_MARGIN + 200f
+        if (index < 3) {
+
+            labelX = 40 + width / 2 - width / 5 + (index * width / 5)
+
+        } else if (index < 7) {
+            labelX = width / 2 - width / 3 + ((index - 3) * width / 5)
+            labelY = contentBounds.bottom + DEFAULT_LABEL_BOTTOM_MARGIN + 300f
+        }
+
+
+        // Draw colored square
+        val labelSquareSize = textSize
+        val squareLeft = (labelX - labelSquareSize / 2f) - 80f
+        val squareTop = labelY - labelSquareSize / 2f
+        val squareRight = squareLeft + labelSquareSize
+        val squareBottom = squareTop + labelSquareSize
+        val text = slice.value.toInt().toString()
+        val bounds = Rect()
+        textPaint.getTextBounds(text, 0, text.length, bounds)
+        val squarePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        canvas.drawText(
+            text,
+            textCenterX,
+            textCenterY,
+            this.textPaint
+        )
+
+        squarePaint.color = labelColor
+        canvas.drawRect(squareLeft, squareTop, squareRight, squareBottom, squarePaint)
+
+
+        canvas.drawText(
+            label,
+            labelX.toFloat(),
+            labelY - labelBounds.exactCenterY(),
+            textPaint
+        )
+
+    }
+
+    fun drawCenteredLabel(
+        canvas: Canvas,
+        slice: Slice,
+        textCenterX: Float,
+        textCenterY: Float,
+        textPaint: Paint,
+    ) {
+
+        val text = slice.value.toInt().toString()
+        val bounds = Rect()
+        textPaint.getTextBounds(text, 0, text.length, bounds)
+        canvas.drawText(
+            text,
+            textCenterX,
+            textCenterY,
+            this.textPaint
+        )
+        canvas.drawText(
+            slice.label,
+            textCenterX,
+            textCenterY + (1.5f * textSize),
+            this.textPaint!!
+        )
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -285,11 +377,15 @@ class SimplePieChart @JvmOverloads constructor(
     companion object {
         // Slices start at 12 o'clock
         private const val START_ANGLE_OFFSET = 270
-        private const val DEFAULT_TEXT_SIZE_SP = 10
+        private const val DEFAULT_TEXT_SIZE_SP = 14
         private var DEFAULT_TEXT_COLOR = Color.BLUE
         private const val DEFAULT_ICON_SIZE_DP = 48
-        private val DEFAULT_DECOR_RING_COLOR = Color.parseColor("#33ffffff")
+        private val DEFAULT_DECOR_RING_COLOR = Color.RED
         private const val DEFAULT_DECOR_RING_WEIGHT = 0.2f
-        private const val DEFAULT_INNER_HOLE_WEIGHT = 0.28f
+        private const val DEFAULT_INNER_HOLE_WEIGHT = 0.25f
+        private const val DEFAULT_LABEL_SPACING = 0f
+        private const val DEFAULT_LABEL_BOTTOM_MARGIN = 16f // Adjust this value as needed
+        private const val DEFAULT_SHOW_LABEL = true
+
     }
 }

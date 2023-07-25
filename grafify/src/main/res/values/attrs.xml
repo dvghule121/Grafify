@@ -3,6 +3,7 @@
 
     <declare-styleable name="SimplePieChart">
         <attr name="textSize" format="dimension" />
+        <attr name="showCenterLabel" format="boolean"/>
         <attr name="textColor" format="color" />
         <attr name="iconSize" format="dimension"/>
         <attr name="decorRingColor" format="color" />
