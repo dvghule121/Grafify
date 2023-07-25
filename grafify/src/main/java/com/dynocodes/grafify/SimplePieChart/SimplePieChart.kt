@@ -101,6 +101,7 @@ class SimplePieChart @JvmOverloads constructor(
                     R.styleable.SimplePieChart_decorRingWeight,
                     DEFAULT_DECOR_RING_WEIGHT
                 )
+            labelSpacing = array.getDimension(R.styleable.SimplePieChart_labelSpacing, DEFAULT_LABEL_SPACING)
             innerHoleWeight =
                 array.getFloat(
                     R.styleable.SimplePieChart_innerHoleWeight,
@@ -143,7 +144,7 @@ class SimplePieChart @JvmOverloads constructor(
 
     private fun drawPercentageValues(canvas: Canvas) {
         var sliceStartAngle = START_ANGLE_OFFSET.toFloat()
-        val textDistance = chartRadius * (0.8f) + labelSpacing
+        val textDistance = chartRadius * (0.9f) + labelSpacing
         var sliceHalfAngle: Float
         var textCenterX: Float
         var textCenterY: Float
@@ -395,7 +396,7 @@ class SimplePieChart @JvmOverloads constructor(
         private val DEFAULT_DECOR_RING_COLOR = Color.RED
         private const val DEFAULT_DECOR_RING_WEIGHT = 0.2f
         private const val DEFAULT_INNER_HOLE_WEIGHT = 0.25f
-        private const val DEFAULT_LABEL_SPACING = 0f
+        private const val DEFAULT_LABEL_SPACING = 16f
         private const val DEFAULT_LABEL_BOTTOM_MARGIN = 16f // Adjust this value as needed
         private const val DEFAULT_SHOW_LABEL = true
 
