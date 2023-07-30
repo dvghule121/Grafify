@@ -6,18 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.dynocodes.grafify.SimplePieChart
-        android:id="@+id/piechart_view"
+    <com.dynocodes.grafify.BarGraphView
         android:layout_width="0dp"
-        android:layout_height="250dp"
-
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:showCenterLabel="true" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 

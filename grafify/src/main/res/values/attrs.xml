@@ -15,6 +15,7 @@
     </declare-styleable>
 
     <declare-styleable name="BarGraphView">
+        <attr name="barColor" format="color"/>
         <attr name="labelTextColor" format="color" />
         <attr name="labelTextSize" format="dimension" />
     </declare-styleable>
